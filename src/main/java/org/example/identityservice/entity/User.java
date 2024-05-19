@@ -2,13 +2,19 @@ package org.example.identityservice.entity;
 
 import jakarta.persistence.*;
 
-import lombok.Data;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Entity
 @Data
 @Table(name = "users")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -17,24 +23,6 @@ public class User {
     private String password;
     private String firstName, lastName;
     private LocalDate dob;
-
-    public User() {
-    }
-
-    public User(String username, String password, String firstName, String lastName, LocalDate dob) {
-        this.username = username;
-        this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.dob = dob;
-    }
-
-    public User(String id, String username, String password, String firstName, String lastName, LocalDate dob) {
-        this.id = id;
-        this.username = username;
-        this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.dob = dob;
-    }
+    @ElementCollection
+    Set<String> roles;
 }

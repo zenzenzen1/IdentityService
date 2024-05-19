@@ -10,6 +10,7 @@ import org.example.identityservice.dto.request.UserCreationRequest;
 import org.example.identityservice.dto.request.UserUpdateRequest;
 import org.example.identityservice.dto.response.UserResponse;
 import org.example.identityservice.entity.User;
+import org.example.identityservice.enums.Role;
 import org.example.identityservice.exception.AppException;
 import org.example.identityservice.exception.ErrorCode;
 import org.example.identityservice.mapper.UserMapper;
@@ -20,18 +21,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-//@RequiredArgsConstructor
-@AllArgsConstructor
+@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class UserService {
-    @Autowired
     UserRepository userRepository;
-    @Autowired
     UserMapper userMapper;
 
     public User createUser(UserCreationRequest request){
@@ -43,12 +42,10 @@ public class UserService {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         request.setPassword(passwordEncoder.encode(request.getPassword()));
         user = userMapper.toUser(request);
-//        user.setUsername(request.getUsername());  
-//        user.setPassword(request.getPassword());
-//        user.setFirstName(request.getFirstName());
-//        user.setLastName(request.getLastName());
-//        user.setDob(request.getDob());
-        
+
+        HashSet<String> roles = new HashSet<>();
+        roles.add(Role.USER.name());
+        user.setRoles(roles);
         
         return userRepository.save(user);
     }
@@ -68,6 +65,11 @@ public class UserService {
 //                .lastName(user.getLastName())
 //                .dob(user.getDob())
 //                .build();
+    }
+    
+    public User getUserByUsername(String username){
+        return userRepository.findById(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
     }
     
     public String encodePassword(String password){

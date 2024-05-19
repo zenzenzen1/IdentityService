@@ -2,12 +2,14 @@ package org.example.identityservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.identityservice.dto.response.ApiResponse;
 import org.example.identityservice.dto.request.UserCreationRequest;
 import org.example.identityservice.dto.request.UserUpdateRequest;
 import org.example.identityservice.dto.response.UserResponse;
 import org.example.identityservice.entity.User;
 import org.example.identityservice.service.UserService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,6 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping({"/users", "/users/"})
 @AllArgsConstructor
+@Slf4j
 public class UserController {
     private UserService userService;
     
@@ -26,8 +29,15 @@ public class UserController {
     }
 
     @GetMapping
-    public List<User> getUsers(){
-       return userService.getUsers();
+    public ApiResponse<List<User>> getUsers(){
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        log.info("username: {} ", authentication.getName());
+        log.info("roles: {}", authentication.getAuthorities());
+        
+        return ApiResponse.<List<User>>builder()
+                .result(userService.getUsers())
+                .code(1000)
+                .build();
     }
 
     @GetMapping("/{userId}")
